@@ -1,0 +1,51 @@
+.daemon-toast {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.daemon-toast-connecting {
+  background-color: #2b2b3a;
+  color: #e5e5e5;
+}
+
+.daemon-toast-ready {
+  background-color: #1f3d2b;
+  color: #b9f6ca;
+}
+
+.daemon-toast-error {
+  background-color: #3d1f1f;
+  color: #ffb4b4;
+}
+
+.daemon-toast-message {
+  margin: 0;
+}
+
+.daemon-toast-retry {
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  background-color: rgba(255, 255, 255, 0.12);
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.daemon-toast-retry:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.daemon-toast-retry:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

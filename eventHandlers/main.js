@@ -7,6 +7,7 @@ import {
 } from "./navbar.js";
 import { loadDefaults } from "./window.js";
 import { handlePrompt } from "./prompt.js";
+import { initDaemonStatusToast } from "./daemonStatus.js";
 import {
   reloadCharts,
   updateCpuChart,
@@ -23,8 +24,8 @@ const nextChat = document.querySelector("#nextChat");
 const addChat = document.querySelector("#addChat");
 
 loadDefaults();
+initDaemonStatusToast();
 
-//window.addEventListener("DOMContentLoaded", () => {
 window.addEventListener("load", () => {
   loadDefaults();
   updateCpuChart();
@@ -43,6 +44,7 @@ deleteChat.addEventListener("click", () => deleteChatHandler());
 promptButton.addEventListener("click", async () => {
   await handlePrompt();
 });
+
 promptChat.addEventListener("keydown", async (event) => {
   if (event.key === "Enter" && event.shiftKey) {
     event.preventDefault();
