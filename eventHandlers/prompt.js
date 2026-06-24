@@ -26,15 +26,36 @@ const createMessage = (content, messageType) => {
   const message = document.createElement("p");
   message.classList.add(`${messageType}-message-content`);
   message.innerHTML = content;
+
+  if (messageType === "lyra") {
+    message.querySelectorAll("pre").forEach((pre) => {
+      const wrapper = document.createElement("div");
+      wrapper.style.cssText = "position:relative;";
+
+      const btn = document.createElement("button");
+      btn.textContent = "Copiar";
+      btn.classList.add("copy-btn");
+
+      btn.addEventListener("click", () => {
+        const code = pre.querySelector("code")?.innerText ?? pre.innerText;
+        navigator.clipboard.writeText(code).then(() => {
+          btn.textContent = "✓ Copiado";
+          setTimeout(() => (btn.textContent = "Copiar"), 2000);
+        });
+      });
+
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.classList.add("pre-wrapper");
+      wrapper.appendChild(pre);
+      wrapper.appendChild(btn);
+    });
+  }
+
   messageContainer.classList.add(`${messageType}-message`);
   messageContainer.append(message);
   return messageContainer;
 };
 
-/**
- * Sends the query to the daemon via IPC (main process owns the Unix socket).
- * Returns the plain-text response, or an inline error message on failure.
- */
 const askLyra = async (entry) => {
   try {
     const response = await window.electron.sendQuery(entry);
@@ -61,7 +82,6 @@ export const handlePrompt = async () => {
   promptChat.replaceChildren();
 
   const lyrasAnswer = await askLyra(rawContent);
-
   saveArrayToStorage("chats", currentChat, { type: "lyra", data: lyrasAnswer });
   messageBox.append(createMessage(lyrasAnswer, "lyra"));
   messageBox.scrollTop = messageBox.scrollHeight;
