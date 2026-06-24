@@ -13,6 +13,7 @@ const { getRAMUsage } = require("./OS/RAM");
 const { getCPUUsage } = require("./OS/CPU");
 const { getDiskUsage } = require("./OS/Disk");
 const lyraSocket = require("./server/lyraSocket");
+const { resetSession } = require("./server/lyraSocket");
 
 let mainWindow;
 const md = new MarkdownIt();
@@ -97,6 +98,10 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
   }
+});
+
+ipcMain.handle("new-chat", () => {
+  resetSession();
 });
 
 ipcMain.handle("get-ram-usage", async () => await getRAMUsage());

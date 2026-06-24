@@ -1,3 +1,25 @@
+.pre-wrapper {
+  position: relative;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 8px;
+  font-size: 0.75em;
+  border-radius: 4px;
+  border: 1px solid var(--decoration-alt-2);
+  background: var(--background-1);
+  color: var(--letter);
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.copy-btn:hover {
+  opacity: 1;
+}
+
 .message-box {
   max-height: -webkit-fill-available;
   width: 96vw;
@@ -33,6 +55,32 @@
   text-align: right;
   background-color: var(--background-1);
   animation: fadeInBottom 0.5s ease-in-out forwards;
+}
+
+.lyra-message-content pre {
+  background-color: var(--background-1);
+  border-radius: 6px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.lyra-message-content code {
+  font-family: monospace;
+  font-size: 0.85em;
+}
+
+.lyra-message-content pre code {
+  color: var(--letter);
+  line-height: 1.5;
+}
+
+.lyra-message-content p {
+  margin: 4px 0;
+}
+
+.lyra-message-content strong {
+  font-weight: 600;
 }
 
 @keyframes fadeInBottom {
