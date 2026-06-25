@@ -51,6 +51,7 @@ const checkLimits = (current, limit) => {
 };
 
 const addChatHandler = () => {
+  window.electronAPI.newChat();
   const currentChat = getItemFromStorage("currentChat");
   const listOfChats = getItemFromStorage("chats");
   listOfChats.push([]);

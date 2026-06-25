@@ -1,6 +1,4 @@
 /**
- * Replaces pythonManager.js.
- *
  * The actual server lives in the lyra-server package, installed system-wide
  * and exposed via `lyra` CLI. This module only:
  *   - checks whether the daemon is running (socket file present + connectable)
@@ -28,6 +26,8 @@ const SOCKET_PATH = path.join(RUNTIME_DIR, "lyra.sock");
 const CONNECT_TIMEOUT_MS = 10_000;
 const POLL_INTERVAL_MS = 300;
 const QUERY_TIMEOUT_MS = 60_000;
+
+let _sessionId = null;
 
 /**
  * Tries a single connection to the daemon socket.
@@ -97,12 +97,9 @@ function waitForDaemon(timeoutMs = CONNECT_TIMEOUT_MS) {
  * surface a retryable error to the UI.
  */
 async function ensureDaemonRunning() {
-  console.log("[lyraSocket] SOCKET_PATH:", SOCKET_PATH);
-  console.log("[lyraSocket] socket exists:", fs.existsSync(SOCKET_PATH));
   const running = await isDaemonRunning();
-  console.log("[lyraSocket] isDaemonRunning:", running);
 
-  if (await isDaemonRunning()) return;
+  if (running) return;
 
   startDaemon();
   const ok = await waitForDaemon();
@@ -128,34 +125,40 @@ function sendQuery(text) {
       reject(err);
     };
 
-    const timer = setTimeout(() => {
-      fail(new Error("QUERY_TIMEOUT"));
-    }, QUERY_TIMEOUT_MS);
+    const timer = setTimeout(() => fail(new Error("QUERY_TIMEOUT")), QUERY_TIMEOUT_MS);
 
     sock.once("connect", () => {
-      sock.end(JSON.stringify({ query: text }));
+      const payload = JSON.stringify({ query: text, session_id: _sessionId });
+      sock.end(payload);
     });
 
     sock.on("data", (chunk) => chunks.push(chunk));
-
-    sock.once("error", (err) => {
-      clearTimeout(timer);
-      fail(err);
-    });
+    sock.once("error", (err) => { clearTimeout(timer); fail(err); });
 
     sock.once("close", () => {
       clearTimeout(timer);
       if (settled) return;
       settled = true;
-      const response = Buffer.concat(chunks).toString("utf8");
-      if (!response) {
-        reject(new Error("DAEMON_CRASHED"));
-        return;
+      const raw = Buffer.concat(chunks).toString("utf8");
+      if (!raw) { reject(new Error("DAEMON_CRASHED")); return; }
+
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed.session_id) _sessionId = parsed.session_id;
+        resolve(parsed.response);
+      } catch {
+        resolve(raw);
       }
-      resolve(response);
     });
   });
 }
+
+
+// When an user add a new chat resets
+function resetSession() {
+  _sessionId = null;
+}
+
 
 /**
  * High-level entry point used by the IPC handler: makes sure the daemon
@@ -178,9 +181,10 @@ async function query(text) {
 module.exports = {
   SOCKET_PATH,
   isDaemonRunning,
-  startDaemon,
-  waitForDaemon,
   ensureDaemonRunning,
+  waitForDaemon,
+  resetSession,
+  startDaemon,
   sendQuery,
   query,
 };
